@@ -198,7 +198,7 @@ lock_acquire (struct lock *lock)
 
   /* Priority donation */
   struct thread* original_holder = lock->holder;
-  if(original_holder->priority < thread_current()->priority) {
+  if(original_holder->original_priority < thread_current()->priority) {
     /* Find the last thread in the wait chain */
     while(original_holder->to_boost != NULL) {
       original_holder = original_holder->to_boost;
@@ -207,6 +207,12 @@ lock_acquire (struct lock *lock)
        the last thread in the chain's priority */
     original_holder->priority = thread_current()->priority;
     thread_current()->priority = original_holder->priority;
+  }
+  for (int x = 0; x<10; x++){
+    if (original_holder->swapped[x]==NULL){
+      original_holder->swapped[x] = thread_current();
+      break;
+    }
   }
 
   sema_down (&lock->semaphore);

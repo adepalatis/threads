@@ -105,6 +105,7 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
+    struct thread* swapped[10];
   };
 
 /* If false (default), use round-robin scheduler.
