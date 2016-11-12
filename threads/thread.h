@@ -92,12 +92,12 @@ struct thread
 
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
+    struct list_elem sort_elem;              /* List element used during sort */
 
     /* Additions for threads/concurrency project */
     int64_t sleep_ticks;
     struct thread* to_boost;
     int original_priority;
-    struct thread* swapped[10];
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

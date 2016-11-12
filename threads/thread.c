@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "lib/kernel/list.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -556,6 +557,9 @@ thread_schedule_tail (struct thread *prev)
 static void
 schedule (void) 
 {
+  /* sort the ready_list array in highest priority */
+  ready_list = *(list_sort_priority(&ready_list));
+
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
   struct thread *prev = NULL;
