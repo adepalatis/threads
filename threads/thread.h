@@ -97,6 +97,7 @@ struct thread
     int64_t sleep_ticks;
     struct thread* to_boost;
     int original_priority;
+    struct thread* swapped[10];
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -105,7 +106,6 @@ struct thread
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
-    struct thread* swapped[10];
   };
 
 /* If false (default), use round-robin scheduler.
