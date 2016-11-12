@@ -99,6 +99,7 @@ struct thread
     struct thread* to_boost;
     int original_priority;
     struct thread* swapped[10];
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
