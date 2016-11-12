@@ -32,6 +32,8 @@
    elements allows us to do a little bit of checking on some
    operations, which can be valuable.) */
 
+list_less_func priority_compare;
+
 static bool is_sorted (struct list_elem *a, struct list_elem *b,
                        list_less_func *less, void *aux) UNUSED;
 
@@ -441,43 +443,45 @@ list_sort (struct list *list, list_less_func *less, void *aux)
 }
 
 struct list* list_sort_priority(struct list* list){
-  size_t size = list_size(list);
+  list_sort(list, &priority_compare, NULL);
 
-  struct list* new_list;
-  list_init(new_list);
+  // size_t size = list_size(list);
 
-  struct list_elem* lowest_thread = list_begin(list);
-  int lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
-  struct list_elem* challenger_thread = lowest_thread;
+  // struct list* new_list;
+  // list_init(new_list);
 
-  int left_over = size - 1;
+  // struct list_elem* lowest_thread = list_begin(list);
+  // int lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
+  // struct list_elem* challenger_thread = lowest_thread;
 
-  /* find the lowest priority every loop and insert it at the beginning of the new_list */
-  for(int i = 0; i < size; i ++){
-    for(int j = 0; i < left_over; j ++){
-      challenger_thread = list_next(challenger_thread);
+  // int left_over = size - 1;
 
-      int challenger_priority = list_entry(challenger_thread, struct thread, sort_elem)->priority;
+  // /* find the lowest priority every loop and insert it at the beginning of the new_list */
+  // for(int i = 0; i < size; i ++){
+  //   for(int j = 0; i < left_over; j ++){
+  //     challenger_thread = list_next(challenger_thread);
 
-      if(challenger_priority < lowest_priority){
-        lowest_priority = challenger_priority;
-        lowest_thread = challenger_thread;
-      }
-    }
+  //     int challenger_priority = list_entry(challenger_thread, struct thread, sort_elem)->priority;
 
-    /* update new_list and list */
-    list_push_front(new_list, lowest_thread);
-    list_remove(lowest_thread);
-    left_over --;
-    /* setup for next round
-     * only get next element if list is not empty */
-    if(size - i > 1){
-      lowest_thread = challenger_thread = list_begin(list);
-      lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
-    }
-  }
+  //     if(challenger_priority < lowest_priority){
+  //       lowest_priority = challenger_priority;
+  //       lowest_thread = challenger_thread;
+  //     }
+  //   }
 
-  return new_list;
+  //   /* update new_list and list */
+  //   list_push_front(new_list, lowest_thread);
+  //   list_remove(lowest_thread);
+  //   left_over --;
+  //   /* setup for next round
+  //    * only get next element if list is not empty */
+  //   if(size - i > 1){
+  //     lowest_thread = challenger_thread = list_begin(list);
+  //     lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
+  //   }
+  // }
+
+  // return new_list;
 }
 
 
@@ -565,7 +569,6 @@ list_min (struct list *list, list_less_func *less, void *aux)
   return min;
 }
 
-list_less_func priority_compare;
 bool 
 priority_compare(const struct list_elem* a, const struct list_elem* b, void* aux) {
   struct thread* a_thread = list_entry(a, struct thread, sort_elem);
