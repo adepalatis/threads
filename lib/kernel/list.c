@@ -564,3 +564,16 @@ list_min (struct list *list, list_less_func *less, void *aux)
     }
   return min;
 }
+
+list_less_func priority_compare;
+bool 
+priority_compare(const struct list_elem* a, const struct list_elem* b, void* aux) {
+  struct thread* a_thread = list_entry(a, struct thread, sort_elem);
+  struct thread* b_thread = list_entry(b, struct thread, sort_elem);
+
+  if(a_thread->priority < b_thread->priority) {
+    return true;
+  } else {
+    return false;
+  }
+}
