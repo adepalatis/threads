@@ -196,6 +196,19 @@ lock_acquire (struct lock *lock)
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
+  /* Priority donation */
+  struct thread* original_holder = lock->holder;
+  if(original_holder->priority < thread_current()->priority) {
+    /* Find the last thread in the wait chain */
+    while(original_holder->to_boost != NULL) {
+      original_holder = original_holder->to_boost;
+    }
+    /* Swap the priority of current thread with 
+       the last thread in the chain's priority */
+    original_holder->priority = thread_current()->priority;
+    thread_current()->priority = original_holder->priority;
+  }
+
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
 }
