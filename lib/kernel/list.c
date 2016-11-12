@@ -1,5 +1,6 @@
 #include "list.h"
 #include "../debug.h"
+#include "../../threads/thread.h"
 
 /* Our doubly linked lists have two header elements: the "head"
    just before the first element and the "tail" just after the
@@ -438,6 +439,47 @@ list_sort (struct list *list, list_less_func *less, void *aux)
 
   ASSERT (is_sorted (list_begin (list), list_end (list), less, aux));
 }
+
+struct list* list_sort_priority(struct list* list){
+  size_t size = list_size(list);
+
+  struct list* new_list;
+  list_init(new_list);
+
+  struct list_elem* lowest_thread = list_begin(list);
+  int lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
+  struct list_elem* challenger_thread = lowest_thread;
+
+  int left_over = size - 1;
+
+  /* find the lowest priority every loop and insert it at the beginning of the new_list */
+  for(int i = 0; i < size; i ++){
+    for(int j = 0; i < left_over; j ++){
+      challenger_thread = list_next(challenger_thread);
+
+      int challenger_priority = list_entry(challenger_thread, struct thread, sort_elem)->priority;
+
+      if(challenger_priority < lowest_priority){
+        lowest_priority = challenger_priority;
+        lowest_thread = challenger_thread;
+      }
+    }
+
+    /* update new_list and list */
+    list_push_front(new_list, lowest_thread);
+    list_remove(lowest_thread);
+    left_over --;
+    /* setup for next round
+     * only get next element if list is not empty */
+    if(size - i > 1){
+      lowest_thread = challenger_thread = list_begin(list);
+      lowest_priority = list_entry(lowest_thread, struct thread, sort_elem)->priority;
+    }
+  }
+
+  return new_list;
+}
+
 
 /* Inserts ELEM in the proper position in LIST, which must be
    sorted according to LESS given auxiliary data AUX.
