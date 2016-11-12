@@ -95,6 +95,8 @@ struct thread
 
     /* Additions for threads/concurrency project */
     int64_t sleep_ticks;
+    struct thread* to_boost;
+    int original_priority;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
