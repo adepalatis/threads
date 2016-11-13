@@ -250,13 +250,13 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  thread_current()->priority = thread_current()->original_priority;
-  for(int k = 0; k < 10; k++) {
-    struct thread* swapped = thread_current()->swapped[k];
-    if(swapped != NULL) {
-      swapped->priority = swapped->original_priority;
-    }
-  }
+  // thread_current()->priority = thread_current()->original_priority;
+  // for(int k = 0; k < 10; k++) {
+  //   struct thread* swapped = thread_current()->swapped[k];
+  //   if(swapped != NULL) {
+  //     swapped->priority = swapped->original_priority;
+  //   }
+  // }
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);

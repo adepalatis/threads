@@ -442,7 +442,7 @@ list_sort (struct list *list, list_less_func *less, void *aux)
   ASSERT (is_sorted (list_begin (list), list_end (list), less, aux));
 }
 
-struct list* list_sort_priority(struct list* list){
+void list_sort_priority(struct list* list){
   list_sort(list, &priority_compare, NULL);
 
   // size_t size = list_size(list);

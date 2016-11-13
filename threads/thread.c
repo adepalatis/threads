@@ -472,9 +472,6 @@ init_thread (struct thread *t, const char *name, int priority)
   /* Additions for threads/concurrency project */
   t->to_boost = NULL;
   t->original_priority = priority;
-
-  list_push_back(&ready_list, &t->sort_elem);
-  schedule();
 }
 
 /* Allocates a SIZE-byte frame at the top of thread T's stack and
@@ -561,7 +558,7 @@ static void
 schedule (void) 
 {
   /* sort the ready_list array in highest priority */
-  // ready_list = *(list_sort_priority(&ready_list));
+  list_sort_priority(&ready_list);
 
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
