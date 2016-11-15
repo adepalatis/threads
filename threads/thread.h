@@ -24,6 +24,13 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
+/* A mapping of a thread that is waiting on a resource to
+   the resource it is waiting on */
+struct resource_waiter {
+  struct thread* t;
+  struct semaphore* resource; 
+};
+
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -99,7 +106,7 @@ struct thread
     struct thread* to_boost;
     struct thread* booster;
     int original_priority;
-    struct thread* swapped[10];
+    struct resource_waiter waiters[10];
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

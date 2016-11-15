@@ -496,7 +496,8 @@ init_thread (struct thread *t, const char *name, int priority)
 
   /* Additions for threads/concurrency project */
   for (int x=0; x<10; x++){
-    t->swapped[x] = NULL;
+    t->waiters[x].t = NULL;
+    t->waiters[x].resource = NULL;
   }
   t->to_boost = NULL;
   t->booster = NULL;
