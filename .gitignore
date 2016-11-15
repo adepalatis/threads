@@ -1,6 +1,7 @@
 LICENSE
 *.config
 README.*
-pintos
-Pintos.*
+*.tags
+*.tags_sorted_by_file
+utils
 
