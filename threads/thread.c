@@ -42,7 +42,7 @@ is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* au
   struct thread* a_thread = list_entry(a, struct thread, elem);
   struct thread* b_thread = list_entry(b, struct thread, elem);
 
-  if(a_thread->priority > b_thread->priority) {
+  if(a_thread->priority >= b_thread->priority) {
     return true;
   } else {
     return false;
@@ -103,31 +103,7 @@ static tid_t allocate_tid (void);
 
 /* Additions for threads/concurrency project */
 // bool 
-// is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
-//   struct thread* a_thread = list_entry(a, struct thread, elem);
-//   struct thread* b_thread = list_entry(b, struct thread, elem);
 
-//   if(a_thread->priority < b_thread->priority) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
-
-// list_less_func* func = &is_lower_priority;
-list_less_func is_lower_priority;
-
-bool
-is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
-  struct thread* a_thread = list_entry(a, struct thread, elem);
-  struct thread* b_thread = list_entry(b, struct thread, elem);
-
-  if(a_thread->priority < b_thread->priority) {
-    return true;
-  } else {
-    return false;
-  }
-}
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
