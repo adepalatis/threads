@@ -205,6 +205,7 @@ lock_acquire (struct lock *lock)
   if(original_holder!=NULL && original_holder->original_priority < cur->priority) {
     /* Find the last thread in the wait chain */
     while(original_holder->to_boost != NULL) {
+      // original_holder->priority = cur->priority;
       original_holder = original_holder->to_boost;
     }
     /* Swap the priority of current thread with 
@@ -212,13 +213,13 @@ lock_acquire (struct lock *lock)
     cur->to_boost = original_holder;
     original_holder->booster = cur;
     original_holder->priority = cur->priority;
-    cur->priority = original_holder->priority;
-    for (int x = 0; x<10; x++){
-      if (original_holder->swapped[x]==NULL){
-        original_holder->swapped[x] = cur;
-        break;
-      }
-    }
+    // cur->priority = original_holder->priority;
+    // for (int x = 0; x<10; x++){
+    //   if (original_holder->swapped[x]==NULL){
+    //     original_holder->swapped[x] = cur;
+    //     break;
+    //   }
+    // }
   }
   
 
@@ -259,23 +260,29 @@ lock_release (struct lock *lock)
   struct thread* cur = thread_current();
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
+  // struct list_elem wait = lock->semaphore.waiters.head;
+  // struct thread* th = list_entry (&wait, struct thread, elem);
+  // printf("NAME: %s\n", th->name);
 
+  // ASSERT(th == cur);
+  // ASSERT()
   if (cur->booster!=NULL){
     cur->booster->to_boost=NULL;
     cur->booster = NULL;
   }
   cur->priority = cur->original_priority;
-  for(int k = 0; k < 10; k++) {
-    struct thread* swapped = cur->swapped[k];
-    if(swapped != NULL) {
-      swapped->priority = swapped->original_priority;
-    }
-  }
+  // for(int k = 0; k < 10; k++) {
+  //   struct thread* swapped = cur->swapped[k];
+  //   if(swapped != NULL) {
+  //     swapped->priority = swapped->original_priority;
+  //   }
+  // }
 
   lock->holder = NULL;
   // priority_sort_helper();
   sema_up (&lock->semaphore);
   // printf("LOCK RELEASED\n");
+  thread_yield();
 }
 
 /* Returns true if the current thread holds LOCK, false
