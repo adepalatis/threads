@@ -22,19 +22,6 @@
 #define THREAD_MAGIC 0xcd6abf4b
 
 /* Additions for threads/concurrency project */
-// bool 
-// is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
-//   struct thread* a_thread = list_entry(a, struct thread, elem);
-//   struct thread* b_thread = list_entry(b, struct thread, elem);
-
-//   if(a_thread->priority < b_thread->priority) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
-
-// list_less_func* func = &is_lower_priority;
 list_less_func is_lower_priority;
 
 bool
