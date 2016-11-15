@@ -109,11 +109,13 @@ timer_elapsed (int64_t then)
 void
 timer_sleep (int64_t ticks) 
 {
-  ASSERT (intr_get_level () == INTR_ON);
-  thread_current()->sleep_ticks = ticks;  // assign requested sleep ticks to current thread
-  enum intr_level old_level = intr_disable(); // disable interrupts to allow thread blocking (???)
-  thread_block(); // block current thread
-  intr_set_level(old_level);  // reset interrupt level
+  if (ticks>0){
+    ASSERT (intr_get_level () == INTR_ON);
+    thread_current()->sleep_ticks = ticks;  // assign requested sleep ticks to current thread
+    enum intr_level old_level = intr_disable(); // disable interrupts to allow thread blocking (???)
+    thread_block(); // block current thread
+    intr_set_level(old_level);  // reset interrupt level
+  }
   // while (timer_elapsed (start) < ticks)  
   //   thread_yield ();
 }
