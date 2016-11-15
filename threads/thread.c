@@ -100,10 +100,6 @@ is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* au
   }
 }
 
-void priority_sort_helper(void) {
-  list_sort(&ready_list, &is_lower_priority, NULL);
-}
-
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
    general and it is possible in this case only because loader.S
@@ -596,6 +592,7 @@ static void
 schedule (void) 
 { /*  Only need to update priority when a lock is released or
       a thread donates it's priority */
+  list_sort(&ready_list, &is_lower_priority, NULL);
 
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
