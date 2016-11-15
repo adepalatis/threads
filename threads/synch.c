@@ -273,6 +273,7 @@ lock_release (struct lock *lock)
   }
 
   lock->holder = NULL;
+  // priority_sort_helper();
   sema_up (&lock->semaphore);
   // printf("LOCK RELEASED\n");
 }

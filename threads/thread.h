@@ -110,6 +110,9 @@ struct thread
     unsigned magic;                     /* Detects stack overflow. */
   };
 
+/* Additions for threads/concurrency project */
+bool is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux);
+
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
    Controlled by kernel command-line option "-o mlfqs". */
