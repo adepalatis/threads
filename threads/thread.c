@@ -42,7 +42,7 @@ is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* au
   struct thread* a_thread = list_entry(a, struct thread, elem);
   struct thread* b_thread = list_entry(b, struct thread, elem);
 
-  if(a_thread->priority < b_thread->priority) {
+  if(a_thread->priority > b_thread->priority) {
     return true;
   } else {
     return false;
@@ -594,7 +594,7 @@ schedule (void)
 { /*  Only need to update priority when a lock is released or
       a thread donates it's priority */
   /* sort the ready_list array in highest priority */
-  // list_sort(&ready_list, &is_lower_priority, NULL);
+  list_sort(&ready_list, &is_lower_priority, NULL);
   // ASSERT (!list_empty(&ready_list));
 
   struct thread *cur = running_thread ();
