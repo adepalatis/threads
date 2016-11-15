@@ -21,35 +21,6 @@
    of thread.h for details. */
 #define THREAD_MAGIC 0xcd6abf4b
 
-/* Additions for threads/concurrency project */
-// bool 
-// is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
-//   struct thread* a_thread = list_entry(a, struct thread, elem);
-//   struct thread* b_thread = list_entry(b, struct thread, elem);
-
-//   if(a_thread->priority < b_thread->priority) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
-
-// list_less_func* func = &is_lower_priority;
-list_less_func is_lower_priority;
-
-bool
-is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
-  struct thread* a_thread = list_entry(a, struct thread, elem);
-  struct thread* b_thread = list_entry(b, struct thread, elem);
-
-  if(a_thread->priority < b_thread->priority) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-
 /* List of processes in THREAD_READY state, that is, processes
    that are ready to run but not actually running. */
 static struct list ready_list;
@@ -100,6 +71,38 @@ static void *alloc_frame (struct thread *, size_t size);
 static void schedule (void);
 void thread_schedule_tail (struct thread *prev);
 static tid_t allocate_tid (void);
+
+/* Additions for threads/concurrency project */
+// bool 
+// is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
+//   struct thread* a_thread = list_entry(a, struct thread, elem);
+//   struct thread* b_thread = list_entry(b, struct thread, elem);
+
+//   if(a_thread->priority < b_thread->priority) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// }
+
+// list_less_func* func = &is_lower_priority;
+list_less_func is_lower_priority;
+
+bool
+is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
+  struct thread* a_thread = list_entry(a, struct thread, elem);
+  struct thread* b_thread = list_entry(b, struct thread, elem);
+
+  if(a_thread->priority < b_thread->priority) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+void priority_sort_helper(void) {
+  list_sort(&ready_list, &is_lower_priority, NULL);
+}
 
 /* Initializes the threading system by transforming the code
    that's currently running into a thread.  This can't work in
@@ -593,9 +596,6 @@ static void
 schedule (void) 
 { /*  Only need to update priority when a lock is released or
       a thread donates it's priority */
-  /* sort the ready_list array in highest priority */
-  // list_sort(&ready_list, &is_lower_priority, NULL);
-  // ASSERT (!list_empty(&ready_list));
 
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
