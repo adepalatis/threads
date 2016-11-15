@@ -120,7 +120,46 @@ sema_up (struct semaphore *sema)
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
   sema->value++;
+
+
+  /* Recycled logic from lock_release() */
+  struct thread* cur = thread_current();
+  cur->priority = cur->original_priority;
+  for(int k = 0; k < 10; k++) {
+    struct resource_waiter wait = cur->waiters[k];
+    if(wait.t != NULL && wait.resource == sema) {
+      // printf("CLEARING WAITER\n");
+      cur->waiters[k].t = NULL;
+    }
+  }
+
+  int highestPriority = 0;
+  int index = -1;
+  for(int k = 0; k < 10; k++) {
+    struct resource_waiter wait = cur->waiters[k];
+    if(wait.t!=NULL && wait.t->priority > highestPriority) {
+      highestPriority = wait.t->priority;
+      index = k;
+    }
+  }
+  if (highestPriority > cur->priority){
+    cur->priority = highestPriority;
+  }
+
+  if (cur->booster!=NULL){
+    // cur->booster->to_boost = NULL;
+    if (index>-1){
+      cur->booster = cur->waiters[index].t;
+      cur->booster->to_boost = cur;
+    }
+    else{
+      cur->booster = NULL;
+    }
+  }
+
   intr_set_level (old_level);
+
+  thread_yield(); // current
 }
 
 static void sema_test_helper (void *sema_);
@@ -362,7 +401,9 @@ cond_wait (struct condition *cond, struct lock *lock)
   ASSERT (lock_held_by_current_thread (lock));
   
   sema_init (&waiter.semaphore, 0);
-  list_push_back (&cond->waiters, &waiter.elem);
+  // list_push_back (&cond->waiters, &waiter.elem);
+  list_insert_ordered(&cond->waiters, &waiter.elem, &is_lower_priority, NULL);
+
   lock_release (lock);
   sema_down (&waiter.semaphore);
   thread_yield();
