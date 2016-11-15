@@ -208,19 +208,20 @@ lock_acquire (struct lock *lock)
     while(original_holder->to_boost != NULL) {
       // original_holder->priority = cur->priority;
       original_holder = original_holder->to_boost;
+      // printf("IN WHILE LOOP\n");
     }
     /* Swap the priority of current thread with 
        the last thread in the chain's priority */
     cur->to_boost = original_holder;
     original_holder->booster = cur;
     original_holder->priority = cur->priority;
-    // cur->priority = original_holder->priority;
-    // for (int x = 0; x<10; x++){
-    //   if (original_holder->swapped[x]==NULL){
-    //     original_holder->swapped[x] = cur;
-    //     break;
-    //   }
-    // }
+    for (int x = 0; x<10; x++){
+      if (original_holder->waiters[x].t==NULL){
+        original_holder->waiters[x].t = cur;
+        original_holder->waiters[x].resource = &lock->semaphore;
+        break;
+      }
+    }
   }
   
 
@@ -261,24 +262,34 @@ lock_release (struct lock *lock)
   struct thread* cur = thread_current();
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
-  // struct list_elem wait = lock->semaphore.waiters.head;
-  // struct thread* th = list_entry (&wait, struct thread, elem);
-  // printf("NAME: %s\n", th->name);
-
-  // ASSERT(th == cur);
-  // ASSERT()
-  if (cur->booster!=NULL){
-    cur->booster->to_boost=NULL;
-    cur->booster = NULL;
-  }
+  // printf("IN LOCK RELEASE\n");
   cur->priority = cur->original_priority;
-  // for(int k = 0; k < 10; k++) {
-  //   struct thread* swapped = cur->swapped[k];
-  //   if(swapped != NULL) {
-  //     swapped->priority = swapped->original_priority;
-  //   }
-  // }
+  for(int k = 0; k < 10; k++) {
+    struct resource_waiter wait = cur->waiters[k];
+    if(wait.t != NULL && wait.resource == &lock->semaphore) {
+      printf("CLEARING WAITER\n");
+      cur->waiters[k].t = NULL;
+    }
+  }
 
+  int highestPriority = 0;
+  int index = 0;
+  for(int k = 0; k < 10; k++) {
+    struct resource_waiter wait = cur->waiters[k];
+    if(wait.t!=NULL && wait.t->priority > highestPriority) {
+      highestPriority = wait.t->priority;
+      index = k;
+    }
+  }
+  if (highestPriority > cur->priority){
+    cur->priority = highestPriority;
+  }
+
+  if (cur->booster!=NULL){
+    cur->booster->to_boost = NULL;
+    cur->booster = cur->waiters[index].t;
+    cur->booster->to_boost = cur;
+  }
   lock->holder = NULL;
   // priority_sort_helper();
   sema_up (&lock->semaphore);
