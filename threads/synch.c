@@ -267,13 +267,13 @@ lock_release (struct lock *lock)
   for(int k = 0; k < 10; k++) {
     struct resource_waiter wait = cur->waiters[k];
     if(wait.t != NULL && wait.resource == &lock->semaphore) {
-      printf("CLEARING WAITER\n");
+      // printf("CLEARING WAITER\n");
       cur->waiters[k].t = NULL;
     }
   }
 
   int highestPriority = 0;
-  int index = 0;
+  int index = -1;
   for(int k = 0; k < 10; k++) {
     struct resource_waiter wait = cur->waiters[k];
     if(wait.t!=NULL && wait.t->priority > highestPriority) {
@@ -286,9 +286,14 @@ lock_release (struct lock *lock)
   }
 
   if (cur->booster!=NULL){
-    cur->booster->to_boost = NULL;
-    cur->booster = cur->waiters[index].t;
-    cur->booster->to_boost = cur;
+    // cur->booster->to_boost = NULL;
+    if (index>-1){
+      cur->booster = cur->waiters[index].t;
+      cur->booster->to_boost = cur;
+    }
+    else{
+      cur->booster = NULL;
+    }
   }
   lock->holder = NULL;
   // priority_sort_helper();
