@@ -69,7 +69,8 @@ sema_down (struct semaphore *sema)
   while (sema->value == 0) 
     {
       // printf("BEFORE THERAD CURRENT\n");
-      list_push_back (&sema->waiters, &thread_current ()->elem);
+      // list_push_back (&sema->waiters, &thread_current ()->elem);
+      list_insert_ordered(&sema->waiters, &thread_current()->elem, &is_lower_priority, NULL); 
       // printf("AFTER THERAD CURRENT\n");
       thread_block ();
     }
