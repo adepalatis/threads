@@ -444,6 +444,9 @@ running_thread (void)
 static bool
 is_thread (struct thread *t)
 {
+  if ((t != NULL && t->magic == THREAD_MAGIC)==false){
+    int x = 0;
+  }
   return t != NULL && t->magic == THREAD_MAGIC;
 }
 
@@ -464,13 +467,16 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
   t->magic = THREAD_MAGIC;
-
   old_level = intr_disable ();
   list_push_back (&all_list, &t->allelem);
   intr_set_level (old_level);
 
   /* Additions for threads/concurrency project */
+  for (int x=0; x<10; x++){
+    t->swapped[x] = NULL;
+  }
   t->to_boost = NULL;
+  t->booster = NULL;
   t->original_priority = priority;
 }
 

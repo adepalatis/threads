@@ -97,6 +97,7 @@ struct thread
     /* Additions for threads/concurrency project */
     int64_t sleep_ticks;
     struct thread* to_boost;
+    struct thread* booster;
     int original_priority;
     struct thread* swapped[10];
 

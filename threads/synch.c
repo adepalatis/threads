@@ -68,7 +68,9 @@ sema_down (struct semaphore *sema)
   old_level = intr_disable ();
   while (sema->value == 0) 
     {
+      // printf("BEFORE THERAD CURRENT\n");
       list_push_back (&sema->waiters, &thread_current ()->elem);
+      // printf("AFTER THERAD CURRENT\n");
       thread_block ();
     }
   sema->value--;
@@ -191,32 +193,38 @@ lock_init (struct lock *lock)
    we need to sleep. */
 void
 lock_acquire (struct lock *lock)
-{
+{ 
+  // printf("Size of thread %d\n", sizeof(struct thread));
+  struct thread* cur = thread_current();
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
 
   // /* Priority donation */
-  // struct thread* original_holder = lock->holder;
-  // if(original_holder->original_priority < thread_current()->priority) {
-  //   /* Find the last thread in the wait chain */
-  //   while(original_holder->to_boost != NULL) {
-  //     original_holder = original_holder->to_boost;
-  //   }
-  //   /* Swap the priority of current thread with 
-  //      the last thread in the chain's priority */
-  //   original_holder->priority = thread_current()->priority;
-  //   thread_current()->priority = original_holder->priority;
-  // }
-  // for (int x = 0; x<10; x++){
-  //   if (original_holder->swapped[x]==NULL){
-  //     original_holder->swapped[x] = thread_current();
-  //     break;
-  //   }
-  // }
+  struct thread* original_holder = lock->holder;
+  if(original_holder!=NULL && original_holder->original_priority < cur->priority) {
+    /* Find the last thread in the wait chain */
+    while(original_holder->to_boost != NULL) {
+      original_holder = original_holder->to_boost;
+    }
+    /* Swap the priority of current thread with 
+       the last thread in the chain's priority */
+    cur->to_boost = original_holder;
+    original_holder->booster = cur;
+    original_holder->priority = cur->priority;
+    cur->priority = original_holder->priority;
+    for (int x = 0; x<10; x++){
+      if (original_holder->swapped[x]==NULL){
+        original_holder->swapped[x] = cur;
+        break;
+      }
+    }
+  }
+  
 
   sema_down (&lock->semaphore);
-  lock->holder = thread_current ();
+  lock->holder = cur;
+  // printf("LOCK ACQUIRED\n");
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -247,12 +255,18 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock) 
 {
+  // printf("LOCK BEING RELEASED\n");
+  struct thread* cur = thread_current();
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-  thread_current()->priority = thread_current()->original_priority;
+  if (cur->booster!=NULL){
+    cur->booster->to_boost=NULL;
+    cur->booster = NULL;
+  }
+  cur->priority = cur->original_priority;
   for(int k = 0; k < 10; k++) {
-    struct thread* swapped = thread_current()->swapped[k];
+    struct thread* swapped = cur->swapped[k];
     if(swapped != NULL) {
       swapped->priority = swapped->original_priority;
     }
@@ -260,6 +274,7 @@ lock_release (struct lock *lock)
 
   lock->holder = NULL;
   sema_up (&lock->semaphore);
+  // printf("LOCK RELEASED\n");
 }
 
 /* Returns true if the current thread holds LOCK, false
