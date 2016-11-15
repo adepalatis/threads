@@ -564,7 +564,7 @@ static void
 schedule (void) 
 {
   /* sort the ready_list array in highest priority */
-  // ready_list = *(list_sort_priority(&ready_list));
+  list_sort_priority(&ready_list);
 
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
