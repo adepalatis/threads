@@ -116,6 +116,7 @@ sema_up (struct semaphore *sema)
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
+  list_sort(&sema->waiters, &is_lower_priority, NULL);
   if (!list_empty (&sema->waiters)) 
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
@@ -245,8 +246,15 @@ lock_acquire (struct lock *lock)
   struct thread* original_holder = lock->holder;
   if(original_holder!=NULL && original_holder->original_priority < cur->priority) {
     /* Find the last thread in the wait chain */
+    struct semaphore* newResource = &lock->semaphore;
     while(original_holder->to_boost != NULL) {
-      // original_holder->priority = cur->priority;
+      original_holder->priority = cur->priority;
+      for (int i = 0; i < 10; i++){
+        if (original_holder->to_boost->waiters[i].t==original_holder){
+          // printf("NEW RESOURCE\n");
+          newResource = original_holder->to_boost->waiters[i].resource;
+        }
+      }
       original_holder = original_holder->to_boost;
       // printf("IN WHILE LOOP\n");
     }
@@ -258,7 +266,7 @@ lock_acquire (struct lock *lock)
     for (int x = 0; x<10; x++){
       if (original_holder->waiters[x].t==NULL){
         original_holder->waiters[x].t = cur;
-        original_holder->waiters[x].resource = &lock->semaphore;
+        original_holder->waiters[x].resource = newResource;
         break;
       }
     }
