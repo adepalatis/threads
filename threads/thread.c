@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/synch.h"
 #include "lib/kernel/list.h"
 #ifdef USERPROG
 #include "userprog/process.h"
@@ -28,6 +29,21 @@ bool
 is_lower_priority(const struct list_elem* a, const struct list_elem* b, void* aux) {
   struct thread* a_thread = list_entry(a, struct thread, elem);
   struct thread* b_thread = list_entry(b, struct thread, elem);
+
+  if(a_thread->priority > b_thread->priority) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+list_less_func is_lower_priority_sema;
+bool
+is_lower_priority_sema(const struct list_elem* a, const struct list_elem* b, void* aux) {
+  struct semaphore_elem* a_elem = list_entry(a, struct semaphore_elem, elem);
+  struct semaphore_elem* b_elem = list_entry(b, struct semaphore_elem, elem);
+  struct thread* a_thread = a_elem->t;
+  struct thread* b_thread = b_elem->t;
 
   if(a_thread->priority > b_thread->priority) {
     return true;
